@@ -1,0 +1,97 @@
+mandatory: True
+code: |
+  get_started
+  name
+  has_progress
+  has_blockers
+  if has_blockers == True:
+    blockers.reviewed
+  final_screen_shown
+---
+event: final_screen_shown
+question: |
+  Thanks! We'll see you at the meeting.
+---
+objects:
+  person: ALIndividual
+  blockers: DAList.using(object_type=DAObject, complete_attribute='summary', gathered=True)
+---
+features:
+  question back button: True
+---
+id: get_started
+question: |
+  Community Meeting Standup
+subquestion: | 
+  This is a quick interview to help make our meetings more efficient. Are you ready to get started?
+continue button field: get_started
+continue button label: Start Standup
+---
+id: get_name
+question: |
+  What's your name?
+fields:
+  - Name: name
+    label above field: True
+---
+id: get_progress
+question: |
+  Do you have progress, accomplishments, or anything else to share?
+subquestion: |
+  We would love to hear about your progress or accomplishments since the last meeting you attended—or anything else you'd like to share at the meeting.
+yesno: has_progress
+---
+id: get_blockers
+question: |
+  Do you have any blockers you need help with?
+subquestion: | 
+  A **blocker** is anything keeping you from moving forward. At our meetings we make time to try to solve blockers as a group, or connect people who can help each other later.
+yesno: has_blockers
+---
+id: blockers_table
+question: |
+  Your blockers
+subquestion: |
+  % if blockers.number() > 0:
+  
+    ${ blockers.table }
+    ${ blockers.add_action(label="Add Another Blocker") }
+  % else:
+    No blockers yet.
+    
+    ${ blockers.add_action(label="Add a Blocker") }
+  % endif
+continue button field: blockers.reviewed
+continue button label: Finish
+hide continue button: |
+  blockers.number() == 0
+---
+table: blockers.table
+rows: blockers
+columns:
+  - Blocker: |
+      row_item.summary
+  - Type: |
+      row_item.type
+edit:
+  - summary
+  - type
+---
+question: |
+  Add Your ${ capitalize(ordinal(i)) } Blocker
+subquestion: |
+  Write a short, one-line summary of each blocker. At the meeting you can share your screen and explain the blocker in more detail.
+fields:
+  - Summary of your blocker: blockers[i].summary
+    label above field: True
+  - Type of blocker: blockers[i].type
+    input type: radio
+    label above field: True
+    choices: 
+      - Coding
+      - Server admin
+      - Discussion
+      - Other
+---
+question: |
+  Thanks! We'll see you at the meeting.
